@@ -1,0 +1,30 @@
+The first version of scraping divend. Version 0.1
+Developped and tested with Python 2.7
+
+1. generate_ab_list.py
+Will generate the full list of Shang Hai and Shen Zhen A stocks and B stocks, the input files are downloaded from Shang Hai Stock Exchange and Shen Zhen Stock Exchange official website.
+Input files: sha.csv, shb.csv, sza.csv, szb.csv
+The output is full_list.csv, it also provided as a sample
+
+2. stock_info_sina_getter.py
+Will get all history divend data from SINA.com, need full_list.csv as inupt file.
+It will wait 1~5 secends before scrap divend info of next stock. The divend info need not update frequencely, suggest do a full update every 3 months, remove the divend.csv and run it again.
+If it did not finished, just run the script again, it will skip all stocks which already exist and continue to get the others.
+The output is divend.csv
+
+3. divend_sina_getter.py
+Will get lastest price and calculate the divend rate data for all stocks, need full_list.csv and divend.csv as input file.
+Suggest to run it after stock market closed. To scrap all info need about half a hour. 
+The output is output.csv
+
+TODO:
+1. Porting to Python 3.6
+2. Add HongKong H stocks.
+3. Add white name list and black name list.
+
+
+Bug report: contact me through WeChat jerry_marx or GMail jerrymarx(at)gmail.com
+
+Jerry Marx
+Aug 1st, 2018
+ 
