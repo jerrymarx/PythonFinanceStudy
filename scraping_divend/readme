@@ -1,4 +1,4 @@
-The first version of scraping divend. Version 0.1
+The first version of scraping divend. Version 0.1.1
 Developped and tested with Python 2.7
 
 1. generate_ab_list.py
@@ -17,14 +17,17 @@ Will get lastest price and calculate the divend rate data for all stocks, need f
 Suggest to run it after stock market closed. To scrap all info need about half a hour. 
 The output is output.csv
 
+4. generate_ah_list
+Will generate the AH stock list, the input source is from http://quote.eastmoney.com/hk/ahlist.html, copy the content and create a new text file ah.txt
+The output is ah.csv
+
 TODO:
 1. Porting to Python 3.6
-2. Add HongKong H stocks.
-3. Add white name list and black name list.
+2. Add white name list and black name list.
 
 
 Bug report: contact me through WeChat jerry_marx or GMail jerrymarx(at)gmail.com
 
 Jerry Marx
-Aug 1st, 2018
+Aug 6th, 2018
  
