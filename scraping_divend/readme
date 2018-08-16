@@ -1,4 +1,4 @@
-The first version of scraping divend. Version 0.1.1
+The first version of scraping divend. Version 0.1.2
 Developped and tested with Python 2.7
 
 1. generate_ab_list.py
@@ -22,11 +22,23 @@ Will generate the AH stock list, the input source is from http://quote.eastmoney
 The output is ah.csv
 
 TODO:
-1. Porting to Python 3.6
-2. Add white name list and black name list.
+1. Add white name list and black name list.
 
 
-Bug report: contact me through WeChat jerry_marx or GMail jerrymarx(at)gmail.com
+Bug report: contact me through WeChat jerry_marx
+
+CHANGE LOG:
+
+[Aug 16th, 2018]
+Get the prices as group, that will make it faster.
+
+[Aug 6th, 2018]
+Port divend_sina_getter.py to Python 3.6
+Add AH stock in list
+Add stock name in output csv file.
+
+[Aug 1st, 2018]
+Create the tools, on Python 2.7
 
 Jerry Marx
 Aug 6th, 2018
