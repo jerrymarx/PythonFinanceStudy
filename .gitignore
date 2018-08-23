@@ -1,0 +1,3 @@
+scraping_divend/data/*.csv
+scraping_divend/output*
+scraping_divend/tk.csv
