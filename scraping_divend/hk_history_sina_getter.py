@@ -4,7 +4,7 @@ from threading import Timer
 from datetime import datetime
 import re, urllib, time, random, csv, os
 
-def get_HK_stock_history_range(code):
+def get_HK_stock_history_range_from_sina(code):
 	the_url = 'http://stock.finance.sina.com.cn/hkstock/api/jsonp.php//HistoryTradeService.getHistoryRange?symbol=' + code
 	print('Get history range for', code, 'from', the_url, end='', flush=True)
 	for i in range(10):
@@ -30,7 +30,7 @@ def get_HK_stock_history_range(code):
 	print('Done')
 	return matches[0]
 	
-def x_history_range(max_year, max_season, min_year, min_season):
+def x_history_range_for_sina(max_year, max_season, min_year, min_season):
 	max_y = int(max_year)
 	max_s = int(max_season)
 	min_y = int(min_year)
@@ -47,12 +47,12 @@ def x_history_range(max_year, max_season, min_year, min_season):
 def close_response(client):
 	client.close()
 	
-def get_HK_stock_history(code, year, season):
+def get_HK_stock_history_from_sina(code, year, season):
 	the_url = 'http://stock.finance.sina.com.cn/hkstock/history/' + code + '.html'
 	values = {'year': str(year), 'season':str(season)}
 	data = urllib.parse.urlencode(values).encode('utf-8')
 	req = urllib.request.Request(the_url, data)
-	print('Try to get history data of', code, ',', year, 'year', season, 'season', end=' ', flush=True)
+	print('Try to get history data of', code, 'in', year, 'year', season, 'season', end=' ', flush=True)
 	for i in range(5):
 		print('>', end='', flush=True)
 		client = None
@@ -101,14 +101,14 @@ def get_HK_stock_history(code, year, season):
 	lines.reverse()
 	return lines
 	
-def get_HK_stock_whole_history(code):
-	max_year, max_season, min_year, min_season = get_HK_stock_history_range(code)
+def get_HK_stock_whole_history_from_sina(code):
+	max_year, max_season, min_year, min_season = get_HK_stock_history_range_from_sina(code)
 	if max_year is None:
 		return None
 	history = list()
-	for year, season in x_history_range(max_year, max_season, min_year, min_season):
+	for year, season in x_history_range_for_sina(max_year, max_season, min_year, min_season):
 		# print('year:', year, 'season:', season)
-		lines = get_HK_stock_history(code, year, season)
+		lines = get_HK_stock_history_from_sina(code, year, season)
 		if lines is None:
 			break
 		# print('Get', len(lines), 'lines data')
@@ -116,19 +116,19 @@ def get_HK_stock_whole_history(code):
 		time.sleep(random.randint(1,5))
 	return history
 
-def history_data_filename(code):
-	return os.path.join('data', code + '.HK.csv')
+def history_data_filename(folder, code):
+	return os.path.join(folder, code + '.HK.csv')
 	
-def save_to_file(code, history):
-	with open(history_data_filename(code), 'w') as csvfile:
+def save_to_file(folder, code, history):
+	with open(history_data_filename(folder, code), 'w') as csvfile:
 		csvfile.write('trade_date,open,high,low,close,change,pct_change,vol,amount\n')
 		for line in history:
 			csvfile.write(line)
 			csvfile.write('\n')
 
-def get_latest_date_from_file(code):
+def get_latest_date_from_file(folder, code):
 	last_line = None
-	with open(history_data_filename(code)) as csvfile:
+	with open(history_data_filename(foldere, code)) as csvfile:
 		reader = csv.reader(csvfile)
 		lines = list(reader)
 		for i in range(-1,-1 - max(5, len(lines)),-1):
@@ -152,28 +152,19 @@ def load_hk_stock_full_list(filename):
 	return dict
 			
 if __name__ == '__main__':
-#	max_year, max_season, min_year, min_season = get_HK_stock_history_range('01088')
-#	print(max_year, max_season, min_year, min_season)
-#	for line in get_HK_stock_history('00386', 2000, 3):
-#		print(line)
+	hk_stock = load_hk_stock_full_list('list.hk.csv')
+	total = len(hk_stock)
+	done = 0
+	for code in hk_stock:
+		if os.path.exists(history_data_filename(code)):
+			done += 1
+			print('History data for', code, hk_stock[code], 'already exist. [%d/%d] Done.' % (done, total))
+		else:
+			data = get_HK_stock_whole_history_from_sina(code)
+			if data is None:
+				continue
+			save_text_to_file(code, data)
+			done += 1
+			print('Got history data for', code, hk_stock[code], '[%d/%d] Done.' % (done, total))
 
-#	code = '00386'
-#	history = get_HK_stock_whole_history(code)
-#	save_to_file(code, history)
-
-#	hk_stock = load_hk_stock_full_list('list.hk.csv')
-#	total = len(hk_stock)
-#	done = 0
-#	for code in hk_stock:
-#		if os.path.exists(history_data_filename(code)):
-#			done += 1
-#			print('History data for', code, hk_stock[code], 'already exist. [%d/%d] Done.' % (done, total))
-#		else:
-#			data = get_HK_stock_whole_history(code)
-#			if data is None:
-#				continue
-#			save_to_file(code, data)
-#			done += 1
-#			print('Got history data for', code, hk_stock[code], '[%d/%d] Done.' % (done, total))
-
-	print(get_latest_date_from_file('00038'))
+#	print(get_latest_date_from_file('00038'))

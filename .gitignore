@@ -1,3 +1,6 @@
 scraping_divend/data/*.csv
 scraping_divend/output*
 scraping_divend/tk.csv
+*.pyc
+scraping_divend/tmp/
+scraping_divend/yahoo/*.csv
