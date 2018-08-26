@@ -6,12 +6,19 @@ from hk_history_sina_getter import load_hk_stock_full_list
 crumble_regex = r'CrumbStore":{"crumb":"(.*?)"}'
 cookie_regex = r'set-cookie: (.*?); '
 
+def refine_code(code):
+	if code[0] == '0':
+		return code[-4:] + '.HK'
+	else:
+		return code + '.HK'
+
 def get_crumble_and_cookie(code):
-	the_url = 'https://finance.yahoo.com/quote/' + code[-4:] + '.HK/history'
+	the_url = 'https://finance.yahoo.com/quote/' + refine_code(code) + '/history'
 	crumble_str, cookie_str = None, None
 	for i in range(10):
 		client = None
 		try:
+			print('Try get cookie and scrumb', the_url)
 			client = urlopen(the_url, timeout=10)
 			t = Timer(10, close_connection, [client, ])
 			t.start()
@@ -24,6 +31,7 @@ def get_crumble_and_cookie(code):
 			match = re.search(crumble_regex, content_str)
 			crumble_str = match.group(1)
 
+			print('Scrumb:', scrumb, 'Cookie:', cookie)
 			t.cancel()
 			client.close()
 			break
@@ -37,7 +45,7 @@ def close_connection(client):
 
 def get_history_csv_from_yahoo(code, scrumb, cookie):
 	now_gm_timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-	the_url = 'https://query1.finance.yahoo.com/v7/finance/download/' + code[-4:] + '.HK?period1=0&period2=' + str(now_gm_timestamp) + '&interval=1d&events=history&crumb=' + scrumb
+	the_url = 'https://query1.finance.yahoo.com/v7/finance/download/' + refine_code(code) + '?period1=0&period2=' + str(now_gm_timestamp) + '&interval=1d&events=history&crumb=' + scrumb
 	print('Try to get csv from', the_url, end=' ', flush=True)
 	req = urllib.request.Request(the_url, headers={'Cookie': cookie})
 	content = None

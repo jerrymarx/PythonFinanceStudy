@@ -119,7 +119,7 @@ def get_HK_stock_whole_history_from_sina(code):
 def history_data_filename(folder, code):
 	return os.path.join(folder, code + '.HK.csv')
 	
-def save_to_file(folder, code, history):
+def save_text_to_file(folder, code, history):
 	with open(history_data_filename(folder, code), 'w') as csvfile:
 		csvfile.write('trade_date,open,high,low,close,change,pct_change,vol,amount\n')
 		for line in history:
@@ -128,7 +128,7 @@ def save_to_file(folder, code, history):
 
 def get_latest_date_from_file(folder, code):
 	last_line = None
-	with open(history_data_filename(foldere, code)) as csvfile:
+	with open(history_data_filename(folder, code)) as csvfile:
 		reader = csv.reader(csvfile)
 		lines = list(reader)
 		for i in range(-1,-1 - max(5, len(lines)),-1):
@@ -152,18 +152,19 @@ def load_hk_stock_full_list(filename):
 	return dict
 			
 if __name__ == '__main__':
+	folder = 'data'
 	hk_stock = load_hk_stock_full_list('list.hk.csv')
 	total = len(hk_stock)
 	done = 0
 	for code in hk_stock:
-		if os.path.exists(history_data_filename(code)):
+		if os.path.exists(history_data_filename(folder, code)):
 			done += 1
 			print('History data for', code, hk_stock[code], 'already exist. [%d/%d] Done.' % (done, total))
 		else:
 			data = get_HK_stock_whole_history_from_sina(code)
 			if data is None:
 				continue
-			save_text_to_file(code, data)
+			save_text_to_file(folder, code, data)
 			done += 1
 			print('Got history data for', code, hk_stock[code], '[%d/%d] Done.' % (done, total))
 
