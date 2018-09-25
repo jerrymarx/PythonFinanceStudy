@@ -4,3 +4,4 @@ scraping_divend/tk.csv
 *.pyc
 scraping_divend/tmp/
 scraping_divend/yahoo/*.csv
+scraping_divend/yahoo_0826/

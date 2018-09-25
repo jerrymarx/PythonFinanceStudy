@@ -1,7 +1,6 @@
 from urllib.request import urlopen
 from threading import Timer
 import re, urllib, time, datetime, calendar, random, csv, os
-from hk_history_sina_getter import load_hk_stock_full_list
 
 crumble_regex = r'CrumbStore":{"crumb":"(.*?)"}'
 cookie_regex = r'set-cookie: (.*?); '
@@ -66,6 +65,20 @@ def get_history_csv_from_yahoo(code, scrumb, cookie):
 				client.close()
 	print('Done' if content else 'Failed')
 	return content
+
+def load_hk_stock_full_list(filename):
+	dict = {}
+	with open(filename, encoding='utf-8') as csvfile:
+		reader = csv.reader(csvfile)
+		for i in range(3):
+			next(reader)
+		for row in reader:
+			key = row[0]
+			name = row[1]
+			type = row[2]
+			if type in ['股本', '交易所買賣產品', '房地產投資信託基金', ]:
+				dict[key] = name
+	return dict
 	
 def history_data_filename(code):
 	return os.path.join('yahoo', code + '.HK.csv')

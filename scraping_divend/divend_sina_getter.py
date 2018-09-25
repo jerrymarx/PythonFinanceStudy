@@ -169,16 +169,17 @@ class divend_info:
 		self.usd = float(lines[0].split(',')[2])
 		self.hkd = float(lines[1].split(',')[2])
 
-	def get_data_from_sina_then_write(self, code):
+	def get_data_from_sina_then_write(self, code, outfile):
 		price, name = self.get_last_price(code)
 		text = self.format_row(code, price, name)
-		with open('output.csv', 'a', encoding='utf-8-sig') as ofile:
+		with open(outfile, 'a', encoding='utf-8-sig') as ofile:
 			ofile.write(text)
 			ofile.write('\n')
 		
 	def main(self):
 		self.get_usd_hkd()
-		with open('output.csv', 'w',encoding='utf-8-sig') as ofile:
+		outfile = 'output_' + datetime.datetime.now().strftime("%Y%m%d") + '.csv'
+		with open(outfile, 'w',encoding='utf-8-sig') as ofile:
 			heads = ['CODE', 'NAME', 'PRICE', 'TOTAL', 'MARKET']
 			for year in range(2017, 1990, -1):
 				heads.append(str(year))
@@ -189,13 +190,13 @@ class divend_info:
 		done = 0
 		print('Handle the data', end='', flush=True)
 		for key in self.full_dict:
-			self.get_data_from_sina_then_write(key)
+			self.get_data_from_sina_then_write(key, outfile)
 			done += 1
 			if done % 100 == 0:
 				print('.', end='', flush=True)
 				
 		for key in self.ah_dict:
-			self.get_data_from_sina_then_write(key)
+			self.get_data_from_sina_then_write(key, outfile)
 			done += 1
 			if done % 100 == 0:
 				print('.', end='', flush=True)
