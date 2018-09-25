@@ -4,7 +4,7 @@ import re, datetime, csv, time, random
 
 def get_page_soup(the_url):
 	print 'try to get data from:', the_url
-	client = urlopen(the_url)
+	client = urlopen(the_url, timeout=30)
 	page_html = client.read()
 	client.close()
 	
@@ -63,6 +63,7 @@ def get_total_stocks(date, stocks_data):
 	
 def get_divend(code):
 	divend_data, divend_orig = get_divend_data(code)
+	time.sleep(random.randint(10,15))
 	stocks_data, stocks_orig = get_total_stock_data(code)
 	
 	current_year = 0
@@ -116,6 +117,7 @@ if __name__ == '__main__':
 			divend_data, stocks_data = get_divend(code)
 		except:
 			print 'Get date from the url failed'
+			continue
 		done += 1
 		with open(divend_csv, 'a') as outfile:
 			for record in divend_data:
@@ -123,4 +125,4 @@ if __name__ == '__main__':
 				outfile.write(text)
 		print 'Progress ... [%d/%d] done' % (done, total)
 		done_set.add(code)
-		time.sleep(random.randint(1,5))
+		time.sleep(random.randint(10,15))	

@@ -153,7 +153,7 @@ class divend_info:
 		items.append('%.4f' % total_value)
 		
 		divend_info = self.divend_data[key] if key in self.divend_data else {}
-		for year in range(2017, 1990, -1):
+		for year in range(2018, 1990, -1):
 			divend = ('%.4f' % divend_info[year]) if year in divend_info else ''
 			percent = (('%.2f%%' % (divend_info[year]*100/total_value)) if year in divend_info else '') if total_value > 1 else ''
 			items.append(divend)
@@ -181,7 +181,7 @@ class divend_info:
 		outfile = 'output_' + datetime.datetime.now().strftime("%Y%m%d") + '.csv'
 		with open(outfile, 'w',encoding='utf-8-sig') as ofile:
 			heads = ['CODE', 'NAME', 'PRICE', 'TOTAL', 'MARKET']
-			for year in range(2017, 1990, -1):
+			for year in range(2018, 1990, -1):
 				heads.append(str(year))
 				heads.append(str(year)+'p')
 			ofile.write(','.join(heads))
