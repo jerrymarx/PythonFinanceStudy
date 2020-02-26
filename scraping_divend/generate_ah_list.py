@@ -4,7 +4,8 @@ lines = [line.strip().decode('utf-8') for line in infile.readlines()]
 infile.close()
 outputs = list()
 i = 0
-black_list = ['00300', '00350']
+#black_list = ['00300', '00350']
+black_list = list()
 while i < len(lines):
 	number, name, code_h = lines[i].split('\t')
 	code_a = lines[i+3]

@@ -1,13 +1,18 @@
-from urllib2 import urlopen
+try:
+	from urllib.request import urlopen
+except:
+	from urllib2 import urlopen
 from bs4 import BeautifulSoup as soup
 import re, datetime, csv, time, random
 
+def delay():
+	time.sleep(random.randint(10,20))
+
 def get_page_soup(the_url):
-	print 'try to get data from:', the_url
-	client = urlopen(the_url, timeout=30)
+	print('try to get data from:', the_url)
+	client = urlopen(the_url, timeout=90)
 	page_html = client.read()
 	client.close()
-	
 	page_soup = soup(page_html, 'html.parser')
 	return page_soup
 	
@@ -18,7 +23,6 @@ def get_divend_data(code):
 	the_url = 'http://money.finance.sina.com.cn/corp/go.php/vISSUE_ShareBonus/stockid/' + code + '.phtml'
 	page_soup = get_page_soup(the_url)
 	data_body = page_soup.find_all('tbody')[0]
-
 	data = list()
 	orig = list()
 	for row in data_body.find_all('tr'):
@@ -32,7 +36,6 @@ def get_divend_data(code):
 					 'register':convert_date(register_date_str) if register_date_str != '--' else convert_date(public_date_str),
 					 'divend':float(divend_str)})
 		orig.append(cols)
-		#print 'Public Date:', public_date.text.strip(), '\tRigester Date:', register_date.text.strip(), '\tDivend per 10 shares:', divend.text.strip()
 	return data, orig
 
 def get_total_stock_data(code):
@@ -48,7 +51,7 @@ def get_total_stock_data(code):
 			if len(cols) != 0:
 				date_str = cols[0].div.text.strip()
 				count_str = cols[1].div.text.strip()[:-2]
-				data.append({'date':convert_date(date_str), 'count':float(count_str)})
+				data.append({'date':convert_date(date_str), 'count':float(re.sub(r'[^0-9.]', '', count_str))})
 				orig.append(cols)
 	return data, orig
 
@@ -63,11 +66,11 @@ def get_total_stocks(date, stocks_data):
 	
 def get_divend(code):
 	divend_data, divend_orig = get_divend_data(code)
-	time.sleep(random.randint(10,15))
+	delay()
 	stocks_data, stocks_orig = get_total_stock_data(code)
 	
 	current_year = 0
-	for i in xrange(len(divend_data)-1, -1, -1):
+	for i in range(len(divend_data)-1, -1, -1):
 		record = divend_data[i]
 		reg_date = record['register']
 		
@@ -83,7 +86,7 @@ def get_divend(code):
 
 def load_AB_list(filename):
 	full_dict = {}
-	with open(filename, 'rb') as csvfile:
+	with open(filename, encoding='UTF-8') as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
 			key = row[0]
@@ -94,17 +97,28 @@ def load_AB_list(filename):
 def load_divend_done_list(filename):
 	done_set = set()
 	try:
-		with open('divend.csv', 'rb') as csvfile:
+		with open('no_record.txt') as afile:
+			for line in afile.readlines():
+				key = line.strip()
+				if key not in done_set:
+					done_set.add(key)
+	except:
+		pass
+		
+	try:
+		with open('divend.csv') as csvfile:
 			reader = csv.reader(csvfile)
 			for row in reader:
 				key = row[0]
 				if key not in done_set:
 					done_set.add(key)
+					#print('already had', key)
 	except:
 		pass
 	return done_set
 	
 if __name__ == '__main__':
+	no_record_file = 'no_record.txt'
 	divend_csv = 'divend.csv'
 	full_dict = load_AB_list('full_list.csv')
 	done_set = load_divend_done_list(divend_csv)
@@ -116,13 +130,18 @@ if __name__ == '__main__':
 		try:
 			divend_data, stocks_data = get_divend(code)
 		except:
-			print 'Get date from the url failed'
+			# raise
+			print('Get data from the url failed')
 			continue
 		done += 1
-		with open(divend_csv, 'a') as outfile:
-			for record in divend_data:
-				text = '%s,%s,%s,%s,%s\n' % (code, record['total'], record['divend'], record['year'], record['register'].date().isoformat())
-				outfile.write(text)
-		print 'Progress ... [%d/%d] done' % (done, total)
+		if len(divend_data) > 0:
+			with open(divend_csv, 'a') as outfile:
+				for record in divend_data:
+					text = '%s,%s,%s,%s,%s\n' % (code, record['total'], record['divend'], record['year'], record['register'].date().isoformat())
+					outfile.write(text)
+		else:
+			with open(no_record_file, 'a') as outfile:
+				output.write(code + '\n')
+		print('Progress ... [%d/%d] done' % (done, total))
 		done_set.add(code)
-		time.sleep(random.randint(10,15))	
+		delay()

@@ -1,91 +1,92 @@
 # Name: generate_ab_list.py
-# Current version: 0.1
-# Dev and debugged with Python 2.7
+# Current version: 0.2
+# Copyright 2020 TsinghuaChat
+# License: BSD license
+# Dev and debugged with Python 3.6.5
 #
-# This tool is used to generate full_list.csv, the format in csv is 
-# Stock Code, Stock A Code (if has), Stock A Name (if has), Stock B Code (if has), Stock B Name (if has), Total volume A, Total volume B
+# This tool is used dto generate the full_list.csv, the format in this csv are
+# Code, A Code, A Name, B Code, B Name
+# A field maybe empty if it is not avaiable
 #
-# The data source is from ShangHai Stock Exchange official website and ShenZhen Stock Exchange official website.
-# http://www.sse.com.cn/assortment/stock/list/share/, the downloaded files are .xls, open it with notepad++,
-# replace all '\t  ' as ',' and rename as sha.csv and shb.csv
-# http://www.szse.cn/market/stock/list/index.html, the downloaed files are .xlsx, open them with Excel and save 
-# as sza.csv and szb.csv
+# The data source is from Shang Hai Stock Exchange official website and Shen Zhen stock Exchange official website.
 #
-# Put this file and sha.csv, shb.csv, sza.csv, szb.csv in same folder, run 'python generate_ab_list.py', will
-# generate a output file as full_list.csv
+# From http://www.sse.com.cn/assortment/stock/list/share/, download stock list for Main Board A, Main Board B and Sci-Tech Innovation Board
+# http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1
+# http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=2
+# http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=8 
+# The files ext is .xls, but they are plain text files, open it, replace all '\t  ' with ',' and save as sha.csv, shb.csv and shk.csv
 
+# From http://www.szse.cn/market/companys/company/index.html, down load stock list for Main Board A and Main Board B, notice the random in URL may change.
+# http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.6543691230337494
+# http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab2&random=0.238366504422175
+# The files are .xlsx, open them with Excel and save as sza.csv and szb.csv
 
 import csv
 
-full_dict = {}
-
 def read_sz_csv(filename):
-	with open(filename, 'rb') as csvfile:
+	with open(filename, 'r', encoding='UTF-8') as csvfile:
 		reader = csv.reader(csvfile)
-		header = True
+		header = next(reader) #skip the header line
 		for row in reader:
-			if header:
-				header = False
-				continue
 			code_a = row[5].strip()
-			name_a = row[6].decode('UTF-8').strip()
+			name_a = row[6].strip()
 			code_b = row[10].strip()
-			name_b = row[11].decode('UTF-8').strip()
-			total_a_str = row[8].strip().replace(',','')
-			total_b_str = row[13].strip().replace(',','')
-			total_a = float(total_a_str)/10000 if total_a_str != '' else 0.0
-			total_b = float(total_b_str)/10000 if total_b_str != '' else 0.0
-			yield code_a, name_a, code_b, name_b, total_a, total_b
+			name_b = row[11].strip()
+			yield code_a, name_a, code_b, name_b
 
 def read_sh_csv(filename):
-	with open(filename, 'rb') as csvfile:
+	with open(filename, 'r') as csvfile:
 		reader = csv.reader(csvfile)
-		header = True
+		header = next(reader)
 		for row in reader:
-			if header:
-				header = False
-				continue
-			code_a = row[0].strip()
-			name_a = row[1].strip()
-			code_b = row[2].strip()
-			name_b = row[3].strip()
-			text = row[5].strip().replace(',','')
-			total = float(text) if text != '' else 0.0
-			yield code_a, name_a, code_b, name_b, total
-			
-for code_a, name_a, code_b, name_b, total_a, total_b in read_sz_csv('sza.csv'):
-	#print 'Code A:', code_a, 'Name_A:', name_a, 'Code_B:', code_b, 'Name_B:', name_b
-	if len(code_b) == 0:
-		full_dict[code_a] = {'code_a':code_a, 'name_a':name_a, 'code_b':'', 'name_b':'', 'total_a':total_a, 'total_b':total_b}
-	else:
-		d = {'code_a':code_a, 'name_a':name_a, 'code_b':code_b, 'name_b':name_b, 'total_a':total_a, 'total_b':total_b}
-		full_dict[code_a] = d
-		full_dict[code_b] = d
-		 
-for code_a, name_a, code_b, name_b, total_a, total_b in read_sz_csv('szb.csv'):
-	if code_a in full_dict:
-		continue
-	if code_b in full_dict:
-		continue
-	full_dict[code_b] = {'code_a':'', 'name_a':'', 'code_b':code_b, 'name_b':name_b, 'total_a':total_a, 'total_b':total_b}
-	
-for dummy_c, dummy_n, code_a, name_a, total in read_sh_csv('sha.csv'):
-	full_dict[code_a] = {'code_a':code_a, 'name_a':name_a.decode('UTF-8'), 'code_b':'', 'name_b':'', 'total_a':total, 'total_b':0.0}
-	
-for code_a, name_a, code_b, name_b, total in read_sh_csv('shb.csv'):
-	if code_a in full_dict:
-		item = full_dict[code_a]
-		item['code_b'] = code_b
-		item['name_b'] = name_b.decode('UTF-8')
-		item['total_b'] = total
-		full_dict[code_b] = item
-	else:
-		full_dict[code_b] = {'code_a':'', 'name_a':'', 'code_b':code_b, 'name_b':name_b.decode('UTF-8'), 'total_a':0.0, 'total_b':total}
+			company_code = row[0].strip()
+			code = row[2].strip()
+			name = row[3].strip()
+			yield company_code, code, name
 
-import codecs
-csvfile = codecs.open('full_list.csv', 'w', 'UTF-8')
-for k, v in sorted(full_dict.items()):
-	text = '%s,%s,%s,%s,%s,%s,%s\n' % (k, v['code_a'], v['name_a'], v['code_b'], v['name_b'], str(v['total_a']), str(v['total_b']))
-	csvfile.write(text)
+
+def load_sz_a(full):
+	for code_a, name_a, code_b, name_b in read_sz_csv('sza.csv'):
+		info = {'code_a':code_a, 'name_a':name_a, 'code_b':code_b, 'name_b':name_b }
+		full[code_a] = info
+		if len(code_b) > 0:
+			full[code_b] = info 
+
+def load_sz_b(full):
+	for code_a, name_a, code_b, name_b in read_sz_csv('szb.csv'):
+		if code_a in full or code_b in full:
+			continue
+		full[code_b] = {'code_a':code_a, 'name_a':name_a, 'code_b':code_b, 'name_b':name_b }
+		
+def load_sh_a(full):
+	for company_code, code, name in read_sh_csv('sha.csv'):
+		full[code] = {'code_a':code, 'name_a':name, 'code_b':'', 'name_b':''}
+		
+def load_sh_k(full):
+	for company_code, code, name in read_sh_csv('shk.csv'):
+		full[code] = {'code_a':code, 'name_a':name, 'code_b':'', 'name_b':''}
+		
+def load_sh_b(full):
+	for company_code, code, name in read_sh_csv('shb.csv'):
+		if company_code in full:
+			info = full[company_code]
+			info['code_b'] = code
+			info['name_b'] = name
+			full[company_code] = info
+		else:
+			info = {'code_a':'', 'name_a':'', 'code_b':code, 'name_b':name}
+
+if __name__ == '__main__':
+	full_dict = dict()
+	load_sz_a(full_dict)
+	load_sz_b(full_dict)
+	load_sh_a(full_dict)
+	load_sh_b(full_dict)
+	load_sh_k(full_dict)
 	
-csvfile.close()
+	with open('full_list.csv', 'w', encoding='UTF-8') as csvfile:
+		for k, v in sorted(full_dict.items()):
+			text = '%s,%s,%s,%s,%s\n' % (k, v['code_a'], v['name_a'], v['code_b'], v['name_b'])
+			csvfile.write(text)
+
+			

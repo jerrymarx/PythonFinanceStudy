@@ -6,6 +6,16 @@ Will generate the full list of Shang Hai and Shen Zhen A stocks and B stocks, th
 Input files: sha.csv, shb.csv, sza.csv, szb.csv
 The output is full_list.csv, it also provided as a sample
 
+http://www.sse.com.cn/assortment/stock/list/share/
+http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1
+http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=2
+http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=8
+
+http://www.szse.cn/market/companys/company/index.html
+http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110x&TABKEY=tab1&random=0.776687911059379
+http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.6543691230337494
+http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab2&random=0.238366504422175
+
 2. stock_info_sina_getter.py
 Will get all history divend data from SINA.com, need full_list.csv as inupt file.
 It will wait 1~5 secends before scrap divend info of next stock. The divend info need not update frequencely, suggest do a full update every 3 months, remove the divend.csv and run it again.
